@@ -97,3 +97,39 @@ def modinv(a: int, m: int) -> int:
     if g != 1:
         raise ValueError("No existe inverso modular.")
     return x % m
+
+def generate_rsa_keypair(bits_per_prime: int = 512) -> dict:
+    # Genera p y q, luego (n, e, d)
+    p = generate_prime(bits_per_prime)
+    q = generate_prime(bits_per_prime)
+    while q == p:
+        q = generate_prime(bits_per_prime)
+    n = p * q
+    phi = (p - 1) * (q - 1)
+    e = 65537
+    if math.gcd(e, phi) != 1:
+        e = 3
+        while math.gcd(e, phi) != 1:
+            e += 2
+    d = modinv(e, phi)
+    return {'n': n, 'e': e, 'd': d, 'p': p, 'q': q}
+
+def rsa_sign_integer(m: int, private: dict) -> int:
+    return pow(m, private['d'], private['n'])
+
+def rsa_recover_from_signature(sig: int, public: dict) -> int:
+    return pow(sig, public['e'], public['n'])
+
+# Conversión y utilidades
+
+def int_to_hex(i: int) -> str:
+    return format(i, 'x')
+
+def hex_to_int(h: str) -> int:
+    return int(h, 16)
+
+def bytes_to_b64(b: bytes) -> str:
+    return base64.b64encode(b).decode('ascii')
+
+def b64_to_bytes(s: str) -> bytes:
+    return base64.b64decode(s.encode('ascii'))
