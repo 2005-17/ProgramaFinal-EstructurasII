@@ -133,3 +133,46 @@ def bytes_to_b64(b: bytes) -> str:
 
 def b64_to_bytes(s: str) -> bytes:
     return base64.b64decode(s.encode('ascii'))
+
+# Interfaz y flujo principal
+
+def menu_text() -> str:
+    return """
+===== MENÚ =====
+1. Ingresar mensaje
+2. Calcular hash FNV-1
+3. Comprimir mensaje (RLE)
+4. Generar claves RSA y firmar hash
+5. Simular envío (guardar paquete en memoria)
+6. Descomprimir y verificar firma (usar clave pública)
+7. Mostrar estado de autenticidad
+8. Exportar paquete a archivo (JSON)
+9. Importar paquete desde archivo (JSON)
+0. Salir
+"""
+
+def main():
+    mensaje = None            # str
+    mensaje_bytes = None      # bytes
+    hash_hex = None           # str hex 16 caracteres (64-bit)
+    comprimido = None         # bytes
+    clave_priv = None         # dict RSA (contiene d)
+    clave_pub = None          # dict RSA pública (n,e)
+    firma_int = None          # int
+    paquete_enviado = None    # dict {compressed, signature, pub_key}
+    autenticidad = None       # None/True/False
+
+    print("Programa de firma y verificación de mensajes.")
+    print("Trabaja paso a paso con el menú. Si algo falla, selecciona la opción correcta nuevamente.\n")
+
+    while True:
+        print(menu_text())
+        try:
+            op = int(input("Opción: ").strip())
+        except ValueError:
+            print("Ingrese un número del menú.\n")
+            continue
+
+        if op == 0:
+            print("Hasta luego.")
+            break
