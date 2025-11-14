@@ -49,3 +49,51 @@ def rle_decompress(data: bytes) -> bytes:
         val = data[i+1]
         out.extend(bytes([val]) * cnt)
     return bytes(out)
+
+# RSA (generación, firma y verificación)
+
+def is_probable_prime(n: int, k: int = 8) -> bool:
+    if n < 2:
+        return False
+    small_primes = (2,3,5,7,11,13,17,19,23,29)
+    for p in small_primes:
+        if n % p == 0:
+            return n == p
+    # write n-1 = d * 2^s
+    d = n - 1
+    s = 0
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+    for _ in range(k):
+        a = secrets.randbelow(n - 3) + 2
+        x = pow(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+        composite = True
+        for _ in range(s - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                composite = False
+                break
+        if composite:
+            return False
+    return True
+
+def generate_prime(bits: int) -> int:
+    while True:
+        candidate = secrets.randbits(bits) | (1 << (bits - 1)) | 1
+        if is_probable_prime(candidate):
+            return candidate
+
+def egcd(a: int, b: int):
+    if b == 0:
+        return (a, 1, 0)
+    g, x1, y1 = egcd(b, a % b)
+    return (g, y1, x1 - (a // b) * y1)
+
+def modinv(a: int, m: int) -> int:
+    g, x, _ = egcd(a, m)
+    if g != 1:
+        raise ValueError("No existe inverso modular.")
+    return x % m
